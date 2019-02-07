@@ -13,8 +13,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 
+import com.datastax.driver.core.utils.UUIDs;
 import com.insurance.dto.Customer;
 import com.insurance.dto.Person;
+import com.insurance.entity.Client;
+import com.insurance.repository.ClientRepository;
 import com.insurance.repository.CustomerRepository;
 import com.insurance.repository.PersonRepository;
 
@@ -71,6 +74,37 @@ public class InsuranceDemoApplication implements CommandLineRunner{
 					"\t" + personRepository.findByName(person.getName()).toString()));
 		};
 	}
+	
+	@Bean 
+	CommandLineRunner cassandraDemo(ClientRepository clientRepository) {
+		return args ->{
+			
+			clientRepository.deleteAll();
+
+			// save a couple of customers
+			clientRepository.save(new Client(UUIDs.timeBased(), "Alice", "Smith"));
+			clientRepository.save(new Client(UUIDs.timeBased(), "Bob", "Smith"));
+			// fetch all customers
+			System.out.println("Clients found with findAll():");
+			System.out.println("-------------------------------");
+			for (Client client : clientRepository.findAll()) {
+				System.out.println(client);
+			}
+			System.out.println();
+
+			// fetch an individual customer
+			System.out.println("Clients found with findByFirstName('Alice'):");
+			System.out.println("--------------------------------");
+			System.out.println(clientRepository.findByFirstName("Alice"));
+
+			System.out.println("Clients found with findByLastName('Smith'):");
+			System.out.println("--------------------------------");
+			for (Client client : clientRepository.findByLastName("Smith")) {
+				System.out.println(client);
+			}
+		};
+		
+	}
 
 
 	
@@ -82,7 +116,7 @@ public class InsuranceDemoApplication implements CommandLineRunner{
 		repository.deleteAll();
 
 		// save a couple of customers
-		repository.save(new Customer("Alice", "Smith"));
+		repository.save(new Customer("Alice", "Jimm"));
 		repository.save(new Customer("Bob", "Smith"));
 
 		// fetch all customers
@@ -94,11 +128,11 @@ public class InsuranceDemoApplication implements CommandLineRunner{
 		System.out.println();
 
 		// fetch an individual customer
-		System.out.println("Customer found with findByFirstName('Alice'):");
+		System.out.println("Customers found with findByFirstName('Alice'):");
 		System.out.println("--------------------------------");
 		System.out.println(repository.findByFirstName("Alice"));
 
-		System.out.println("Customers found with findByLastName('Smith'):");
+		System.out.println("Customers found with findByLastName('Jimm'):");
 		System.out.println("--------------------------------");
 		for (Customer customer : repository.findByLastName("Smith")) {
 			System.out.println(customer);
